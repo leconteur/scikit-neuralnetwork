@@ -85,3 +85,12 @@ class AutoEncoderBackend(NeuralNetworkBackend):
             trds = transformer_dataset.TransformerDataset(raw=ds, transformer=stack)
             trainsets.append(trds)
         return trainsets
+
+    def _mlp_get_weights(self, l):
+        return l.get_weights()
+
+    def _mlp_to_array(self):
+        return [i.get_value() for i in self.dca.get_params()]
+
+    def _array_to_mlp(self, array, nn):
+        self.dca.set_params(array)

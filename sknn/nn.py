@@ -408,7 +408,8 @@ class NeuralNetwork(object):
         self.debug = debug
         self.verbose = verbose
         self.weights = None
-        
+        self.best_valid_network = None
+
         self._backend = None
         self._create_logger()
         self._setup()
@@ -449,6 +450,7 @@ class NeuralNetwork(object):
         layer.monitor.channels = {str(k): v for k, v in layer.monitor.channels.items()}
         best_valid_error = float("inf")
 
+
         for i in itertools.count(1):
             start = time.time()
             trainer.train(dataset=dataset)
@@ -473,6 +475,9 @@ class NeuralNetwork(object):
                       time.time() - start
                       ))
 
+            if best_valid:
+                self.best_valid_network = self._backend._mlp_to_array()
+
             if not trainer.continue_learning(layer):
                 log.debug("")
                 log.info("Early termination condition fired at %i iterations.", i)
@@ -481,3 +486,6 @@ class NeuralNetwork(object):
                 log.debug("")
                 log.info("Terminating after specified %i total iterations.", i)
                 break
+
+    def reset_best_network(self):
+        self._backend._array_to_mlp(self.best_valid_network, self._backend.mlp)
